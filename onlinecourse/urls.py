@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from . import views
 
 app_name = 'onlinecourse'
+
 urlpatterns = [
     path('', views.CourseListView.as_view(), name='index'),
     path('registration/', views.registration_request, name='registration'),
@@ -16,9 +17,11 @@ urlpatterns = [
     # Enrollment
     path('<int:course_id>/enroll/', views.enroll, name='enroll'),
 
-    
+    # Task 5: Submission & Result
     path('<int:course_id>/submit/', views.submit, name='submit'),
-    path('exam_result/', views.show_exam_result, name='show_exam_result'),
-
+    path(
+        'course/<int:course_id>/submission/<int:submission_id>/result/',
+        views.show_exam_result,
+        name='show_exam_result'
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
