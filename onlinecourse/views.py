@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import render
+from .models import Course, Enrollment, Question, Choice, Submission
+
 
 
 def registration_request(request):
@@ -131,6 +133,60 @@ def submit(request, course_id):
 
 def show_exam_result(request):
     return HttpResponse("Exam result page")
+
+def submit(request, course_id):
+    # Get course and enrollment
+    course = get_object_or_404(Course, pk=course_id)
+    enrollment = Enrollment.objects.get(user=request.user, course=course)
+
+    # Create a new submission
+    submission = Submission.objects.create(enrollment=enrollment)
+
+    # Get selected choice ids from POST data
+    selected_choices = request.POST.getlist('choice_ids')
+
+    # Add choices to submission
+    for choice_id in selected_choices:
+        choice = Choice.objects.get(id=choice_id)
+        submission.choices.add(choice)
+
+    # Redirect to exam result page
+    return HttpResponseRedirect(
+        reverse(
+            'onlinecourse:show_exam_result',
+            args=(course.id, submission.id)
+        )
+    )
+
+def show_exam_result(request, course_id, submission_id):
+    course = get_object_or_404(Course, pk=course_id)
+    submission = get_object_or_404(Submission, pk=submission_id)
+
+    # Get selected choice ids
+    selected_choice_ids = submission.choices.values_list('id', flat=True)
+
+    total_score = 0
+    question_results = []
+
+    # Evaluate each question
+    for question in course.question_set.all():
+        correct = question.is_get_score(selected_choice_ids)
+        if correct:
+            total_score += question.grade
+
+        question_results.append({
+            'question': question,
+            'correct': correct
+        })
+
+    context = {
+        'course': course,
+        'submission': submission,
+        'grade': total_score,
+        'question_results': question_results
+    }
+
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
 
 
 # <HINT> Create an exam result view to check if learner passed exam and show their question results and result for each question,
