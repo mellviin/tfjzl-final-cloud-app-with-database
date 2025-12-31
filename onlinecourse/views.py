@@ -11,6 +11,8 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 # Create your views here.
+from django.http import HttpResponse
+from django.shortcuts import render
 
 
 def registration_request(request):
@@ -122,6 +124,13 @@ def extract_answers(request):
            choice_id = int(value)
            submitted_anwsers.append(choice_id)
    return submitted_anwsers
+
+   
+def submit(request, course_id):
+    return HttpResponse(f"Submit exam for course {course_id}")
+
+def show_exam_result(request):
+    return HttpResponse("Exam result page")
 
 
 # <HINT> Create an exam result view to check if learner passed exam and show their question results and result for each question,
