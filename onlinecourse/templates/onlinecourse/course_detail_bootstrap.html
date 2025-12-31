@@ -54,6 +54,7 @@
 
     <h2>{{ course.name }}</h2>
 
+    <!-- Lessons -->
     <div class="card-columns-vertical">
         {% for lesson in course.lesson_set.all %}
         <div class="card mt-2">
@@ -70,6 +71,7 @@
     {% if user.is_authenticated %}
     <br>
 
+    <!-- Take Exam Button -->
     <button class="btn btn-primary" type="button"
             data-toggle="collapse"
             data-target="#exam"
@@ -77,10 +79,13 @@
             aria-controls="exam">
         Take Exam
     </button>
+
+    <!-- Exam Section -->
     <div class="collapse mt-3" id="exam">
         <div class="card card-body">
 
-            <form method="post">
+            <form method="post"
+                  action="{% url 'onlinecourse:submit' course.id %}">
                 {% csrf_token %}
 
                 {% for question in course.question_set.all %}
@@ -97,7 +102,7 @@
                                    name="choice_ids"
                                    value="{{ choice.id }}">
                             <label class="form-check-label">
-                                {{ choice.choice_text }}
+                                {{ choice.content}}
                             </label>
                         </div>
                         {% endfor %}
@@ -105,11 +110,16 @@
                 </div>
                 {% endfor %}
 
+                <button type="submit" class="btn btn-success">
+                    Submit Exam
+                </button>
+
             </form>
 
         </div>
     </div>
     {% endif %}
 </div>
+
 </body>
 </html>
